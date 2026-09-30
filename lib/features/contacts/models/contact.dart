@@ -1,17 +1,12 @@
 class Contact {
   final String id;
-
   final String name;
-
   final String lastMessage;
-
   final String lastSeen;
-
   final bool online;
-
   final bool typing;
-
   final int unread;
+  final String? firebaseUid;
 
   const Contact({
     required this.id,
@@ -21,6 +16,7 @@ class Contact {
     this.online = false,
     this.typing = false,
     this.unread = 0,
+    this.firebaseUid,
   });
 
   factory Contact.fromLanUser(String username) {
@@ -43,6 +39,7 @@ class Contact {
     bool? online,
     bool? typing,
     int? unread,
+    String? firebaseUid,
   }) {
     return Contact(
       id: id ?? this.id,
@@ -52,6 +49,7 @@ class Contact {
       online: online ?? this.online,
       typing: typing ?? this.typing,
       unread: unread ?? this.unread,
+      firebaseUid: firebaseUid ?? this.firebaseUid,
     );
   }
 }

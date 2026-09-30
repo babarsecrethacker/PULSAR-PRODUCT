@@ -1,0 +1,30 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "$uid === auth.uid",
+        "presence": {
+          ".read": "auth != null",
+          ".write": "$uid === auth.uid"
+        },
+        "profile": {
+          ".read": "auth != null",
+          ".write": "$uid === auth.uid"
+        },
+        "signaling": {
+          ".read": "auth != null && ($uid === auth.uid || root.child('users').child(auth.uid).child('profile').child('publicKey').exists())",
+          ".write": "$uid === auth.uid"
+        },
+        "calls": {
+          ".read": "auth != null",
+          ".write": "$uid === auth.uid"
+        },
+        "messages": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid"
+        }
+      }
+    }
+  }
+}

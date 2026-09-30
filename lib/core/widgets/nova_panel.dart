@@ -15,12 +15,14 @@ class NovaPanel extends StatelessWidget {
     return Container(
       width: width,
       decoration: BoxDecoration(
-        color: const Color(0xFF171717),
+        // Reads from the active theme so the panel follows whichever
+        // family is selected.
+        color: Theme.of(context).colorScheme.surface,
 
         borderRadius: BorderRadius.circular(18),
 
         border: Border.all(
-          color: const Color(0xFF2B2B2B),
+          color: Theme.of(context).colorScheme.outlineVariant,
           width: 1,
         ),
       ),

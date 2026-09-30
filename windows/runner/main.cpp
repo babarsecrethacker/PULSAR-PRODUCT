@@ -4,6 +4,7 @@
 
 #include "flutter_window.h"
 #include "utils.h"
+#include "app_links/app_links_plugin_c_api.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
@@ -24,10 +25,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
 
+  if (SendAppLinkToInstance()) {
+    return EXIT_SUCCESS;
+}
+
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(L"client", origin, size)) {
+  if (!window.Create(L"Pulsar Chat", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

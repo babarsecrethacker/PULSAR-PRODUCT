@@ -1,8 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+
+import '../../../core/theme/nova_theme.dart';
+import '../../../core/widgets/nova_backdrop.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UsernameSetupPage extends StatefulWidget {
-  final Function(String username) onComplete;
+  final Future<void> Function(String username) onComplete;
 
   const UsernameSetupPage({
     super.key,
@@ -24,33 +27,58 @@ class _UsernameSetupPageState
 
 
   Future<void> saveUsername() async {
+    final username = controller.text.trim();
 
-  final username = controller.text.trim();
+    if (username.isEmpty) return;
 
-  if (username.isEmpty) return;
+    setState(() {
+      loading = true;
+    });
 
-  setState(() {
-    loading = true;
-  });
-
-  widget.onComplete(username);
-}
+    try {
+      await widget.onComplete(username);
+    } catch (e) {
+      // The page used to be left stuck on "connecting" forever because
+      // loading was set and never reset when this threw.
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              duration: const Duration(seconds: 6),
+              content: Text(
+                'Could not join: $e',
+                style: const TextStyle(color: Color(0xFFEDF1FF)),
+              ),
+            ),
+          );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
+    }
+  }
 
 
 
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
-
-      backgroundColor:
-          const Color(0xff050510),
-
-      body: Center(
-
-        child: Container(
-
-          width: 380,
+    return NovaScreen(
+      dense: true,
+      child: Center(
+        child: SingleChildScrollView(
+          // A fixed 380px card plus 30px of padding on each side needs
+          // 440px, so anything narrower had to scroll.
+          padding: const EdgeInsets.all(16),
+          child: Container(
+            // Flexible rather than fixed: the card now shrinks with the
+            // window instead of overflowing it.
+            width: 380,
+            constraints: const BoxConstraints(maxWidth: 440),
 
           padding:
               const EdgeInsets.all(30),
@@ -59,14 +87,14 @@ class _UsernameSetupPageState
           decoration: BoxDecoration(
 
             color:
-                Colors.white.withOpacity(.06),
+                NovaColors.surfaceRaised,
 
             borderRadius:
                 BorderRadius.circular(25),
 
             border: Border.all(
               color:
-                  Colors.white12,
+                  NovaColors.border,
             ),
 
           ),
@@ -92,12 +120,13 @@ class _UsernameSetupPageState
               const SizedBox(height:20),
 
 
-              const Text(
+              Text(
                 "Welcome to PULSAR CHAT",
                 style:
                     TextStyle(
-                  color:
-                      Colors.white,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface,
                   fontSize:
                       26,
                   fontWeight:
@@ -114,7 +143,7 @@ class _UsernameSetupPageState
                 style:
                     TextStyle(
                   color:
-                      Colors.white60,
+                      NovaColors.textSecondary,
                 ),
               ),
 
@@ -129,9 +158,11 @@ class _UsernameSetupPageState
 
 
                 style:
-                    const TextStyle(
+                    TextStyle(
                   color:
-                      Colors.white,
+                      Theme.of(context)
+                          .colorScheme
+                          .onSurface,
                 ),
 
 
@@ -142,9 +173,9 @@ class _UsernameSetupPageState
                       "Example: Babar",
 
                   hintStyle:
-                      const TextStyle(
+                      TextStyle(
                     color:
-                        Colors.white38,
+                        NovaColors.textTertiary,
                   ),
 
 
@@ -153,7 +184,7 @@ class _UsernameSetupPageState
 
 
                   fillColor:
-                      Colors.white10,
+                      NovaColors.border,
 
 
                   border:
@@ -194,7 +225,7 @@ class _UsernameSetupPageState
                       ElevatedButton.styleFrom(
 
                     backgroundColor:
-                        const Color(0xff6C63FF),
+                        NovaColors.accent,
 
                     padding:
                         const EdgeInsets.all(16),
@@ -213,13 +244,6 @@ class _UsernameSetupPageState
                   child:
                       const Text(
                     "CONNECT",
-                    style:
-                        TextStyle(
-                      color:
-                          Colors.white,
-                      fontWeight:
-                          FontWeight.bold,
-                    ),
                   ),
 
                 ),
@@ -227,6 +251,8 @@ class _UsernameSetupPageState
               )
 
             ],
+
+          ),
 
           ),
 

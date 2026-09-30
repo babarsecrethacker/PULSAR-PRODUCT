@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "SPACE WIRING" "\0"
-            VALUE "FileDescription", "PULSAR CHAT" "\0"
+            VALUE "FileDescription", "Pulsar Chat" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "pulsar_chat" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "pulsar_chat.exe" "\0"
-            VALUE "ProductName", "PULSAR CHAT" "\0"
+            VALUE "InternalName", "PulsarChat" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 SPACE WIRING. All rights reserved." "\0"
+            VALUE "OriginalFilename", "PulsarChat.exe" "\0"
+            VALUE "ProductName", "Pulsar Chat" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

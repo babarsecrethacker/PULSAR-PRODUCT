@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.2+2
 
 environment:
   sdk: ^3.12.2
@@ -41,6 +41,8 @@ dependencies:
 
   file_picker: ^10.3.2
 
+  http: ^1.5.0
+
   cupertino_icons: ^1.0.8
   web_socket_channel: ^3.0.3
   provider: ^6.1.2
@@ -48,6 +50,16 @@ dependencies:
   flutter_webrtc: ^1.5.2
   flutter_local_notifications: ^22.2.0
   window_manager: ^0.5.2
+  url_launcher: ^6.3.2
+  app_links: ^7.2.1
+  win32_registry: ^2.1.0
+
+  # Firebase
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.0
+  firebase_database: ^11.1.5
+  firebase_messaging: ^15.1.0
+  tray_manager: ^0.5.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -59,6 +71,15 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
 
+# jni 1.0.1 was retracted from pub.dev: its Android build script uses a
+# `kotlin { compilerOptions { ... } }` block that the resolved Kotlin
+# Gradle Plugin does not provide, so the Gradle configuration failed
+# with "Could not find method kotlin() ... on project ':jni'" before any
+# Dart code was compiled. 1.0.3 is the fixed release.
+dependency_overrides:
+  jni: 1.0.3
+  jni_flutter: 1.0.3
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -69,6 +90,10 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/icon/
+    - assets/audio/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

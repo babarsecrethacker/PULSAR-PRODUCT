@@ -1,4 +1,4 @@
-package com.example.client
+﻿package com.pulsar.chat
 
 import io.flutter.embedding.android.FlutterActivity
 

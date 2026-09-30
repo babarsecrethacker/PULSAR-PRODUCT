@@ -4,8 +4,11 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   flutter_webrtc
+  gtk
   record_linux
   screen_retriever_linux
+  tray_manager
+  url_launcher_linux
   window_manager
 )
 

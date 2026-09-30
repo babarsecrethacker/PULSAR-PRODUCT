@@ -1,4 +1,5 @@
 enum SidebarPage {
+  onlineUsers,
   lanUsers,
   chats,
   contacts,

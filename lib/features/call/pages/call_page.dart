@@ -91,16 +91,19 @@ StreamSubscription<String>? endedSubscription;
   });
 
   endedSubscription =
-      WebSocketService().callEnded.listen((user) {
+    WebSocketService().callEnded.listen(
+  (user) async {
     if (!mounted) return;
 
-    if (user == widget.username &&
-    Navigator.canPop(context)) {
+    if (user == widget.username) {
+      await RTCService().close();
 
-  Navigator.pop(context);
+      if (!mounted) return;
 
-}
-  });
+      Navigator.pop(context);
+    }
+  },
+);
 }
 
   String formattedTime() {
@@ -117,26 +120,32 @@ StreamSubscription<String>? endedSubscription;
     return "$m:$s";
   }
 
-  void endCall() {
-
+  Future<void> endCall() async {
   WebSocketService().endCall(
     widget.username,
   );
 
+  await RTCService().close();
+
+  if (!mounted) return;
 
   Navigator.pop(context);
-
 }
 
   @override
-  void dispose() {
-    timer?.cancel();
-    glowController.dispose();
-    acceptedSubscription?.cancel();
-rejectedSubscription?.cancel();
-endedSubscription?.cancel();
-    super.dispose();
-  }
+void dispose() {
+  timer?.cancel();
+
+  glowController.dispose();
+
+  acceptedSubscription?.cancel();
+  rejectedSubscription?.cancel();
+  endedSubscription?.cancel();
+
+  RTCService().close();
+
+  super.dispose();
+}
 
   @override
 Widget build(BuildContext context) {

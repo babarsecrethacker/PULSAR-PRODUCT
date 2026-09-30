@@ -43,3 +43,34 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# ---------------------------------------------------------------------
+# Local build outputs and archives that must never be committed.
+#
+# The Firebase C++ SDK under .firebase_sdk is ~2GB, and its prebuilt
+# libraries (firebase_firestore.lib and friends) reach 1.5GB each.
+# GitHub rejects files over 100MB, so these would break the push.
+# ---------------------------------------------------------------------
+.firebase_sdk/
+*.lib
+*.dll
+*.so
+*.dylib
+*.exe
+*.zip
+*.rar
+*.7z
+*.apk
+*.aab
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Tooling / platform caches
+.gradle/
+android/local.properties
+android/.cxx/
+**/.cxx/
+
