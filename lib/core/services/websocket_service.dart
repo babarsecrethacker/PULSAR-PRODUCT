@@ -1253,10 +1253,13 @@ RTCService().setRemoteUser(from);
     // otherwise on the stored id.
     final String? clientId = statusMsg.clientMessageId;
 
+    // Match on the id the composer generated. The optimistic bubble can
+    // carry it either as its own id or as clientMessageId depending on
+    // which code path built it, so both are checked.
     bool matches(ChatMessage m) =>
         (clientId != null &&
             clientId.isNotEmpty &&
-            m.id == clientId) ||
+            (m.id == clientId || m.clientMessageId == clientId)) ||
         m.id == statusMsg.id;
 
     for (int i = 0; i < _messages.length; i++) {
@@ -1401,6 +1404,10 @@ RTCService().setRemoteUser(from);
     if (targetUserId != null) {
       payload['to_id'] = targetUserId;
     }
+
+    print(
+      "📤 send to='$to' to_id=$targetUserId from='$fromId' id=$messageId",
+    );
 
     if (toFirebaseUid != null) {
       payload['to'] = toFirebaseUid;
@@ -1728,10 +1735,13 @@ void rejectCall(
     _myUsername = null;
     _myFirebaseUid = null;
     _myUserId = null;
+    _myLanId = null;
 
     _lastUid = null;
     _lastUserId = null;
     _lastSessionToken = null;
+
+    _lanIdsByName = <String, int>{};
 
     _reconnectTimer?.cancel();
     _reconnectTimer = null;

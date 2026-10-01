@@ -460,6 +460,16 @@ class _NovaAppState extends State<NovaApp> {
       if (name != null && name.isNotEmpty && userId != null && firebaseUid != null) {
         final prefs = await SharedPreferences.getInstance();
 
+        final issuedToken =
+            data['session_token']?.toString();
+
+        if (issuedToken != null && issuedToken.isNotEmpty) {
+          await prefs.setString(
+            'pulsar_session_token',
+            issuedToken,
+          );
+        }
+
         await prefs.setString('pulsar_mode', 'online');
         await prefs.setString('pulsar_username', name);
         if (returnedEmail != null && returnedEmail.isNotEmpty) {
@@ -485,6 +495,7 @@ class _NovaAppState extends State<NovaApp> {
           email = returnedEmail;
           currentUserId = userId;
           this.firebaseUid = firebaseUid;
+          this.sessionToken = issuedToken ?? sessionToken;
           isOnline = true;
           onlineLoggedIn = true;
           sessionLoaded = true;
@@ -494,7 +505,11 @@ class _NovaAppState extends State<NovaApp> {
         WebSocketService().connectWithFirebaseUid(
           firebaseUid: firebaseUid,
           userId: userId,
-          sessionToken: sessionToken,
+          // The session token issued at login is what authenticates
+          // the socket. Without it the server treats the client as an
+          // anonymous LAN peer with id 0, and its messages cannot be
+          // saved - which is why they stayed stuck on "pending".
+          sessionToken: issuedToken ?? sessionToken,
         );
 
         // Start listening to Firebase presence
