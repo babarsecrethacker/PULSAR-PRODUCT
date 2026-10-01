@@ -1459,7 +1459,7 @@ RTCService().setRemoteUser(from);
     sendRaw({
       "type": "call_request",
       "callId": callId,
-      "from": _myFirebaseUid ?? _myUsername!,
+      "from": _callIdentity,
       "to": peer,
     });
   }
@@ -1480,7 +1480,7 @@ Future<void> acceptCall(
   sendRaw({
     "type": "call_accept",
     "callId": callId,
-    "from": _myFirebaseUid ?? _myUsername!,
+    "from": _callIdentity,
     "to": peer,
   });
 
@@ -1502,7 +1502,7 @@ void rejectCall(
     sendRaw({
       "type": "call_reject",
       "callId": callId,
-      "from": _myFirebaseUid ?? _myUsername!,
+      "from": _callIdentity,
       "to": peer,
     });
 
@@ -1529,7 +1529,7 @@ void rejectCall(
     sendRaw({
       "type": "call_end",
       "callId": callId,
-      "from": _myFirebaseUid ?? _myUsername!,
+      "from": _callIdentity,
       "to": peer,
     });
 
@@ -1546,6 +1546,19 @@ void rejectCall(
   // ---------------------------------------------------------
   // RTC SIGNALS
   // ---------------------------------------------------------
+
+  /// Identity carried in call signalling frames.
+  ///
+  /// It must match what the receiver looks the call up with
+  /// (`_getCallId(from)`). These frames were sending the Firebase UID
+  /// instead of the account id the call was registered under, so no
+  /// lookup ever matched and every offer was dropped as "stale" - the
+  /// microphone opened but no audio was ever negotiated.
+  String get _callIdentity {
+    if (_myLanId != null) return '$_myLanId';
+    if (_myUserId != null && _myUserId! > 0) return '$_myUserId';
+    return _myFirebaseUid ?? _myUsername ?? '';
+  }
 
   void sendOffer(
     String peer,
@@ -1566,7 +1579,7 @@ void rejectCall(
     sendRaw({
       "type": "offer",
       "callId": callId,
-      "from": _myFirebaseUid ?? _myUsername!,
+      "from": _callIdentity,
       "to": peer,
       "sdp": sdp,
     });
@@ -1591,7 +1604,7 @@ void rejectCall(
     sendRaw({
       "type": "answer",
       "callId": callId,
-      "from": _myFirebaseUid ?? _myUsername!,
+      "from": _callIdentity,
       "to": peer,
       "sdp": sdp,
     });
@@ -1611,7 +1624,7 @@ void rejectCall(
     sendRaw({
       "type": "candidate",
       "callId": callId,
-      "from": _myFirebaseUid ?? _myUsername!,
+      "from": _callIdentity,
       "to": peer,
       "candidate": candidate,
     });
@@ -1656,7 +1669,7 @@ void rejectCall(
     final messageId = DateTime.now().microsecondsSinceEpoch.toString();
     sendRaw({
       "type": "file_offer",
-      "from": _myFirebaseUid ?? _myUsername!,
+      "from": _callIdentity,
       "to": to,
       "name": name,
       "size": size,
