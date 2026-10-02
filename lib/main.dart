@@ -871,20 +871,30 @@ class _NovaAppState extends State<NovaApp> {
   Widget build(BuildContext context) {
     final AppSettings settings = AppSettings.instance;
 
+    // A phone gets its own theme rather than a shrunken desktop one.
+    // The viewport is only known once a MediaQuery exists, so this is
+    // resolved below in the builder.
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Pulsar Chat',
-      // One ThemeData per family. The accent picker only applies to the
-      // original violet theme: the other three have designed accents
-      // (notably WhatsApp's green) that an override would undo.
-      theme: NovaTheme.build(
-        family: settings.themeFamily,
-        accent: settings.themeFamily == NovaThemeFamily.purple
-            ? settings.accentColor
-            : null,
-      ),
       builder: (BuildContext context, Widget? child) {
-        // Apply the user's text size preference across the whole tree.
+        final bool isPhone =
+            MediaQuery.sizeOf(context).width < 600;
+
+        final ThemeData phoneTheme = NovaTheme.mobile(
+          family: settings.themeFamily,
+          accent: settings.themeFamily == NovaThemeFamily.purple
+              ? settings.accentColor
+              : null,
+        );
+
+        final ThemeData desktopTheme = NovaTheme.build(
+          family: settings.themeFamily,
+          accent: settings.themeFamily == NovaThemeFamily.purple
+              ? settings.accentColor
+              : null,
+        );
+
         final MediaQueryData data = MediaQuery.of(context);
 
         return MediaQuery(
@@ -893,7 +903,12 @@ class _NovaAppState extends State<NovaApp> {
               settings.textScale,
             ),
           ),
-          child: child ?? const SizedBox.shrink(),
+          child: Theme(
+            // Wrapping rather than passing `theme:` lets the phone and
+            // desktop use different component sizing from one build.
+            data: isPhone ? phoneTheme : desktopTheme,
+            child: child ?? const SizedBox.shrink(),
+          ),
         );
       },
       home: AppIntro(

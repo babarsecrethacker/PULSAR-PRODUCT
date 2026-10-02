@@ -462,17 +462,37 @@ class NovaTheme {
   static ThemeData build({
     NovaThemeFamily family = NovaThemeFamily.purple,
     Color? accent,
+    bool mobile = false,
   }) {
     final NovaThemeSpec s = specOf(family);
     final Color brand = accent ?? s.accent;
     final Color brandMuted = _mute(brand, s.isLight);
 
-    return _build(
+    if (!mobile) {
+      return _build(
+        s: s,
+        brand: brand,
+        brandMuted: brandMuted,
+      );
+    }
+
+    return _buildMobile(
       s: s,
       brand: brand,
       brandMuted: brandMuted,
     );
   }
+
+  /// Builds the phone variant of a family.
+  ///
+  /// This is a separate theme rather than a scaled desktop one because
+  /// a phone needs different ergonomics: 48dp touch targets instead of
+  /// 40, larger body type for a shorter reading distance, and full
+  /// width list tiles instead of dense desktop rows.
+  static ThemeData mobile({
+    NovaThemeFamily family = NovaThemeFamily.purple,
+    Color? accent,
+  }) => build(family: family, accent: accent, mobile: true);
 
   /// Convenience for the default family.
   static ThemeData dark({Color? accent}) => build(accent: accent);
@@ -493,6 +513,286 @@ class NovaTheme {
         .withLightness((hsl.lightness * 0.42).clamp(0.0, 1.0))
         .withSaturation((hsl.saturation * 0.55).clamp(0.0, 1.0))
         .toColor();
+  }
+
+  /// Builds the phone variant of a family.
+  ///
+  /// A phone needs different ergonomics from a desktop window, so this
+  /// is a real theme rather than the desktop one scaled: 48dp touch
+  /// targets instead of 40, body type a step larger for the shorter
+  /// reading distance, roomier list rows, and Material 3 phone shapes.
+  static ThemeData _buildMobile({
+    required NovaThemeSpec s,
+    required Color brand,
+    required Color brandMuted,
+  }) {
+    final ThemeData desktop = _build(
+      s: s,
+      brand: brand,
+      brandMuted: brandMuted,
+    );
+
+    const TextTheme text = TextTheme(
+      headlineSmall: TextStyle(
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.3,
+        height: 1.25,
+      ),
+      titleLarge: TextStyle(
+        fontSize: 19,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.1,
+      ),
+      titleMedium: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        height: 1.3,
+      ),
+      titleSmall: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        height: 1.3,
+      ),
+      bodyLarge: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+        height: 1.5,
+      ),
+      bodyMedium: TextStyle(
+        fontSize: 14.5,
+        fontWeight: FontWeight.w400,
+        height: 1.5,
+      ),
+      bodySmall: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w400,
+        height: 1.45,
+      ),
+      labelLarge: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.1,
+      ),
+      labelMedium: TextStyle(
+        fontSize: 13.5,
+        fontWeight: FontWeight.w500,
+      ),
+      labelSmall: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.3,
+      ),
+    );
+
+    // 48dp is the Material minimum for a reliable touch target.
+    const Size target = Size(0, 48);
+
+    return desktop.copyWith(
+      textTheme: text,
+      primaryTextTheme: text,
+
+      appBarTheme: desktop.appBarTheme.copyWith(
+        centerTitle: false,
+        elevation: 0,
+        scrolledUnderElevation: 0.5,
+        toolbarHeight: 56,
+        titleTextStyle: text.titleLarge,
+        backgroundColor: s.surface,
+        foregroundColor: s.textPrimary,
+        surfaceTintColor: Colors.transparent,
+      ),
+
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: brand,
+          foregroundColor: s.onAccent,
+          minimumSize: const Size(double.infinity, 52),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          textStyle: text.labelLarge,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: s.surfaceOverlay,
+          foregroundColor: s.textPrimary,
+          elevation: 0,
+          minimumSize: target,
+          textStyle: text.labelLarge,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: s.border),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: s.textPrimary,
+          minimumSize: target,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          textStyle: text.labelLarge,
+          side: BorderSide(color: s.borderStrong),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: brand,
+          minimumSize: target,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          textStyle: text.labelLarge,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: s.textSecondary,
+          minimumSize: const Size(48, 48),
+          highlightColor: s.surfaceOverlay,
+        ),
+      ),
+
+      inputDecorationTheme: desktop.inputDecorationTheme.copyWith(
+        filled: true,
+        fillColor: s.surfaceInput,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 16,
+        ),
+        hintStyle: text.bodyMedium?.copyWith(
+          color: s.textDisabled,
+        ),
+        labelStyle: text.bodyMedium?.copyWith(
+          color: s.textSecondary,
+        ),
+        border: _border(s.border, radius: 14),
+        enabledBorder: _border(s.border, radius: 14),
+        focusedBorder: _border(brand, width: 2, radius: 14),
+        errorBorder: _border(s.danger, radius: 14),
+      ),
+
+      listTileTheme: ListTileThemeData(
+        iconColor: s.textSecondary,
+        textColor: s.textPrimary,
+        titleTextStyle: text.titleMedium,
+        subtitleTextStyle: text.bodySmall,
+        minVerticalPadding: 12,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 4,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+      ),
+
+      dialogTheme: DialogThemeData(
+        backgroundColor: s.surfaceRaised,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 40,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(22),
+        ),
+        titleTextStyle: text.titleLarge,
+        contentTextStyle: text.bodyMedium?.copyWith(
+          height: 1.5,
+        ),
+      ),
+
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: s.surfaceRaised,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(22),
+          ),
+        ),
+      ),
+
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: s.isLight
+            ? const Color(0xFF2B2B2B)
+            : s.surfaceOverlay,
+        contentTextStyle: text.bodyMedium?.copyWith(
+          color: Colors.white,
+        ),
+        actionTextColor: brand,
+        elevation: 0,
+        insetPadding: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStatePropertyAll<Color>(
+          s.onAccent,
+        ),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return brand;
+          return s.surfaceOverlay;
+        }),
+        trackOutlineColor: WidgetStatePropertyAll<Color>(
+          s.border,
+        ),
+      ),
+
+      cardTheme: CardThemeData(
+        color: s.surfaceRaised,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: s.border),
+        ),
+      ),
+
+      dividerTheme: DividerThemeData(
+        color: s.divider,
+        thickness: 1,
+        space: 1,
+      ),
+
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: brand,
+        foregroundColor: s.onAccent,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: brand,
+        linearTrackColor: s.surfaceOverlay,
+        circularTrackColor: s.surfaceOverlay,
+      ),
+    );
+  }
+
+  static OutlineInputBorder _border(
+    Color color, {
+    double width = 1,
+    double radius = NovaRadius.md,
+  }) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(radius),
+      borderSide: BorderSide(color: color, width: width),
+    );
   }
 
   static ThemeData _build({
@@ -783,13 +1083,6 @@ class NovaTheme {
         radius: const Radius.circular(NovaRadius.pill),
         thickness: const WidgetStatePropertyAll<double>(8),
       ),
-    );
-  }
-
-  static OutlineInputBorder _border(Color color, {double width = 1}) {
-    return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(NovaRadius.md),
-      borderSide: BorderSide(color: color, width: width),
     );
   }
 
