@@ -43,7 +43,7 @@ void main() {
         }
       }
 
-      expect(dark, 2);
+      expect(dark, 3);
       expect(light, 2);
     });
   });

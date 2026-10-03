@@ -6,6 +6,9 @@ import '../../../core/services/recent_contacts_service.dart';
 import '../../../core/services/tray_service.dart';
 import '../../../core/services/unread_service.dart';
 import '../../../core/services/update_service.dart';
+import '../../../core/services/app_settings.dart';
+import '../../../core/theme/cyber_theme.dart';
+import '../../../core/widgets/cyber_primitives.dart';
 import '../../../core/services/websocket_service.dart';
 import '../../../core/theme/nova_theme.dart';
 import '../../../core/widgets/nova_drawer.dart';
@@ -369,6 +372,18 @@ class _HomeShellState extends State<HomeShell>
   /// phone's whole width.
   static const double _railBreakpoint = 900;
 
+/// LAN Mesh is violet, Cloud Grid is cyan. The ambient backdrop uses
+  /// this so the two engines never look alike. Tracked from which
+  /// pages the user visits, which is a reliable signal since online and
+  /// LAN expose different destinations.
+  bool _isOnlineMode = true;
+
+  PulseEngine get _engine =>
+      _isOnlineMode ? PulseEngine.cloud : PulseEngine.lan;
+
+  bool get _isCyberTheme =>
+      AppSettings.instance.themeFamily == NovaThemeFamily.cyber;
+
   @override
   Widget build(BuildContext context) {
     if (widget.trayAction != null) {
@@ -389,11 +404,28 @@ class _HomeShellState extends State<HomeShell>
     );
   }
 
-  void _onPageSelected(SidebarPage page) {
+  /// Wraps a screen in the ambient cyber backdrop when that theme is
+  /// active; otherwise the screen paints its own background.
+  Widget _wrapAmbient(Widget child) {
+    if (!_isCyberTheme) return child;
+
+    return CyberBackdrop(engine: _engine, child: child);
+  }
+
+void _onPageSelected(SidebarPage page) {
     // Leaving the chat view releases the active conversation so new
     // messages count as unread again.
     if (page != SidebarPage.chats) {
       UnreadService.instance.setActiveContact(null);
+    }
+
+    // Online Users and Calls live on the cloud engine; LAN Users is the
+    // local mesh. Drives the ambient colour.
+    final bool online =
+        page != SidebarPage.lanUsers;
+
+    if (_isOnlineMode != online) {
+      setState(() => _isOnlineMode = online);
     }
 
     setState(() {
@@ -424,7 +456,7 @@ class _HomeShellState extends State<HomeShell>
               child: Padding(
                 padding: const EdgeInsets.all(NovaSpacing.lg),
                 child: NovaPanel(
-                  child: _buildCurrentPage(),
+                child: _wrapAmbient(_buildCurrentPage()),
                 ),
               ),
             ),
@@ -469,10 +501,10 @@ class _HomeShellState extends State<HomeShell>
           ),
 
           Expanded(
-            child: Padding(
+child: Padding(
               padding: const EdgeInsets.all(NovaSpacing.sm),
               child: NovaPanel(
-                child: _buildNarrowPage(),
+                child: _wrapAmbient(_buildNarrowPage()),
               ),
             ),
           ),

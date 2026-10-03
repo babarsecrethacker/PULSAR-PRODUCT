@@ -1554,6 +1554,27 @@ void rejectCall(
   /// instead of the account id the call was registered under, so no
   /// lookup ever matched and every offer was dropped as "stale" - the
   /// microphone opened but no audio was ever negotiated.
+  /// Resolves a call identity back to a display name.
+  ///
+  /// Call frames carry a numeric account id so both sides can look the
+  /// call up, which meant the call screen rendered that number instead
+  /// of a person. The roster maps name to identity, so it is inverted
+  /// here for LAN peers; online contacts already carry the account id.
+  String? displayNameFor(String identity) {
+    if (identity.isEmpty) return null;
+
+    if (_myLanId != null && identity == '$_myLanId') {
+      return _myUsername;
+    }
+
+    for (final MapEntry<String, int> entry
+        in _lanIdsByName.entries) {
+      if ('${entry.value}' == identity) return entry.key;
+    }
+
+    return null;
+  }
+
   String get _callIdentity {
     if (_myLanId != null) return '$_myLanId';
     if (_myUserId != null && _myUserId! > 0) return '$_myUserId';

@@ -470,9 +470,9 @@ void _sendReadReceipts() {
 
     incomingCallOverlay = OverlayEntry(
 
-  builder: (_) => IncomingCallToast(
-
-    caller: caller,
+builder: (_) => IncomingCallToast(
+      // Resolved so the toast shows a name rather than a raw id.
+      caller: WebSocketService().displayNameFor(caller) ?? caller,
 
     onAccept: () async {
 
@@ -483,11 +483,15 @@ void _sendReadReceipts() {
 
       if (!mounted) return;
 
-      Navigator.push(
+Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => CallPage(
-            username: caller,
+            // Resolve the numeric identity back to a person, otherwise
+            // the call screen shows a raw id.
+            username: WebSocketService()
+                    .displayNameFor(caller) ??
+                caller,
           ),
         ),
       );

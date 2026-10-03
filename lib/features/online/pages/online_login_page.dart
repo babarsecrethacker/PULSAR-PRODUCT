@@ -44,18 +44,38 @@ class _OnlineLoginPageState extends State<OnlineLoginPage> {
           FirebaseService().isAvailable;
 
       if (nativeSignIn) {
-        final credential = await FirebaseService().signInWithGoogle();
+        try {
+          final credential =
+              await FirebaseService().signInWithGoogle();
 
-        if (!mounted) return;
+          if (!mounted) return;
 
-        setState(() {
-          loading = false;
-        });
+          setState(() {
+            loading = false;
+          });
 
-        await widget.onLoginSuccess?.call(credential);
-        return;
+          await widget.onLoginSuccess?.call(credential);
+          return;
+        } catch (e) {
+          // Some devices have no working Google Play Services, so
+          // Firebase falls back to a browser flow that fails with
+          // "missing initial state". The server's own OAuth flow needs
+          // no Play Services at all, so fall through to it rather than
+          // leaving the user stuck on an opaque Google error page.
+          debugPrint(
+            'Firebase sign-in unavailable ($e); '
+            'falling back to server sign-in',
+          );
+
+          if (!mounted) return;
+
+          setState(() {
+            loading = true;
+          });
+        }
       }
 
+      // Browser sign-in through our server.
       final launched = await launchUrl(
         Uri.parse('${OnlineConfig.serverUrl}/auth/google'),
         mode: LaunchMode.externalApplication,

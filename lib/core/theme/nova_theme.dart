@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+
+import 'cyber_theme.dart';
 import 'package:flutter/services.dart';
 
 /// Design tokens for Pulsar Chat.
@@ -128,7 +130,11 @@ enum NovaThemeFamily {
   whatsappLight('WhatsApp Light'),
 
   /// Light with a calm blue accent.
-  blueLight('Blue Light');
+  blueLight('Blue Light'),
+
+  /// Obsidian: the cyber HUD look. Cyan and violet signal colours on
+  /// a near-black canvas, with glass surfaces.
+  cyber('Cyber Obsidian');
 
   const NovaThemeFamily(this.label);
 
@@ -444,10 +450,43 @@ class NovaTheme {
     isLight: true,
   );
 
+  /// Obsidian surfaces for the cyber family. The cyber theme has its
+  /// own [CyberTheme] definition; this spec keeps the token API total
+  /// so widgets that read NovaThemeSpec keep working.
+  static const NovaThemeSpec _cyber = NovaThemeSpec(
+    family: NovaThemeFamily.cyber,
+    canvas: Color(0xFF05070B),
+    surface: Color(0xFF0A0E16),
+    surfaceRaised: Color(0xFF111726),
+    surfaceOverlay: Color(0xFF18202F),
+    surfaceInput: Color(0xFF0A0E16),
+    border: Color(0x1FFFFFFF),
+    borderStrong: Color(0x40FFFFFF),
+    divider: Color(0x1AFFFFFF),
+    textPrimary: Color(0xFFEDF4FF),
+    textSecondary: Color(0xFF9AA9C4),
+    textTertiary: Color(0xFF63708A),
+    textDisabled: Color(0xFF414D63),
+    accent: Color(0xFF22E4F5),
+    accentHover: Color(0xFF5BEFF7),
+    onAccent: Color(0xFF001318),
+    success: Color(0xFF31E0A1),
+    warning: Color(0xFFF5B942),
+    danger: Color(0xFFFF4D6A),
+    online: Color(0xFF31E0A1),
+    chatBackground: Color(0xFF05070B),
+    bubbleOwn: Color(0xFF5B21B6),
+    bubbleOwnText: Color(0xFFEDF4FF),
+    bubbleOther: Color(0xFF111726),
+    bubbleOtherText: Color(0xFFEDF4FF),
+    isLight: false,
+  );
+
   static const Map<NovaThemeFamily, NovaThemeSpec> _specs =
       <NovaThemeFamily, NovaThemeSpec>{
     NovaThemeFamily.purple: _purple,
     NovaThemeFamily.black: _black,
+    NovaThemeFamily.cyber: _cyber,
     NovaThemeFamily.whatsappLight: _whatsapp,
     NovaThemeFamily.blueLight: _blueLight,
   };
@@ -464,6 +503,28 @@ class NovaTheme {
     Color? accent,
     bool mobile = false,
   }) {
+// The cyber family has its own design system rather than a palette
+    // swap, so it is delegated instead of being re-tinted here. The
+    // shared chat extension is attached from this side to avoid a
+    // circular import, so widgets reading it work in every family.
+    if (family == NovaThemeFamily.cyber) {
+      final NovaThemeSpec cs = _cyber;
+
+      return CyberTheme.build(mobile: mobile).copyWith(
+        extensions: <ThemeExtension<dynamic>>[
+          NovaChatColors(
+            chatBackground: cs.chatBackground,
+            bubbleOwn: cs.bubbleOwn,
+            bubbleOwnText: cs.bubbleOwnText,
+            bubbleOther: cs.bubbleOther,
+            bubbleOtherText: cs.bubbleOtherText,
+            online: cs.online,
+            warning: cs.warning,
+          ),
+        ],
+      );
+    }
+
     final NovaThemeSpec s = specOf(family);
     final Color brand = accent ?? s.accent;
     final Color brandMuted = _mute(brand, s.isLight);
